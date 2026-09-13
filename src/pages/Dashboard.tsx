@@ -149,15 +149,9 @@ export function Dashboard() {
         <p className="text-blue-500">Here's your Thespian Society rank and point log.</p>
       </div>
 
-      <section className="grid gap-4 sm:grid-cols-2">
-        <div className="rounded-xl border border-blue-100 bg-white p-5 text-center shadow-sm">
-          <p className="mb-2 text-xs font-semibold tracking-wide text-blue-500 uppercase">Member Status</p>
-          <StatusBadge value={profile.role} />
-        </div>
-        <div className="rounded-xl border border-blue-100 bg-white p-5 text-center shadow-sm">
-          <p className="mb-2 text-xs font-semibold tracking-wide text-blue-500 uppercase">Current Rank</p>
-          <p className="text-lg font-bold text-orange-600">{currentRank?.name ?? 'Not Yet Honored'}</p>
-        </div>
+      <section className="rounded-xl border border-blue-100 bg-white p-5 text-center shadow-sm">
+        <p className="mb-2 text-xs font-semibold tracking-wide text-blue-500 uppercase">Current Rank</p>
+        <p className="text-lg font-bold text-orange-600">{currentRank?.name ?? 'Not Yet Honored'}</p>
       </section>
 
       <section className="rounded-xl border border-blue-100 bg-white p-6 shadow-sm">

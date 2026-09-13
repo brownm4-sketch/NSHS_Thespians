@@ -8,7 +8,7 @@ const linkClass = ({ isActive }: { isActive: boolean }) =>
   }`
 
 export function Navbar() {
-  const { session, profile, isOfficer, signOut } = useAuth()
+  const { session, profile, isAdmin, signOut } = useAuth()
   const navigate = useNavigate()
   const [menuOpen, setMenuOpen] = useState(false)
 
@@ -35,18 +35,12 @@ export function Navbar() {
             <NavLink to="/" className={linkClass} end>
               Home
             </NavLink>
-            <NavLink to="/officers" className={linkClass}>
-              Officers
-            </NavLink>
-            <NavLink to="/apply" className={linkClass}>
-              Apply
-            </NavLink>
             {session && (
               <NavLink to="/dashboard" className={linkClass}>
                 My Dashboard
               </NavLink>
             )}
-            {isOfficer && (
+            {isAdmin && (
               <NavLink to="/admin" className={linkClass}>
                 Admin Panel
               </NavLink>
@@ -63,7 +57,7 @@ export function Navbar() {
                 to="/login"
                 className="ml-2 rounded-md bg-orange-500 px-3 py-2 text-sm font-semibold text-blue-900 transition-colors hover:bg-orange-400"
               >
-                Member Login
+                Student Login
               </NavLink>
             )}
           </div>
@@ -85,18 +79,12 @@ export function Navbar() {
             <NavLink to="/" className={linkClass} end onClick={closeMenu}>
               Home
             </NavLink>
-            <NavLink to="/officers" className={linkClass} onClick={closeMenu}>
-              Officers
-            </NavLink>
-            <NavLink to="/apply" className={linkClass} onClick={closeMenu}>
-              Apply
-            </NavLink>
             {session && (
               <NavLink to="/dashboard" className={linkClass} onClick={closeMenu}>
                 My Dashboard
               </NavLink>
             )}
-            {isOfficer && (
+            {isAdmin && (
               <NavLink to="/admin" className={linkClass} onClick={closeMenu}>
                 Admin Panel
               </NavLink>
@@ -114,7 +102,7 @@ export function Navbar() {
                 onClick={closeMenu}
                 className="mt-1 block rounded-md bg-orange-500 px-3 py-2 text-center text-sm font-semibold text-blue-900 transition-colors hover:bg-orange-400"
               >
-                Member Login
+                Student Login
               </NavLink>
             )}
           </div>

@@ -12,11 +12,11 @@ export function ProtectedRoute({ children }: { children: ReactNode }) {
 }
 
 export function AdminRoute({ children }: { children: ReactNode }) {
-  const { session, isOfficer, loading } = useAuth()
+  const { session, isAdmin, loading } = useAuth()
 
   if (loading) return <div className="py-20 text-center text-blue-500">Loading…</div>
   if (!session) return <Navigate to="/login" replace />
-  if (!isOfficer) return <Navigate to="/dashboard" replace />
+  if (!isAdmin) return <Navigate to="/dashboard" replace />
 
   return <>{children}</>
 }

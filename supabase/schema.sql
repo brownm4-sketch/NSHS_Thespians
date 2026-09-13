@@ -11,15 +11,16 @@ create table if not exists public.profiles (
   email text not null,
   full_name text not null default '',
   graduation_year int,
-  role text not null default 'pending_member'
-    check (role in ('admin', 'officer', 'member', 'pending_member', 'non_member')),
+  is_admin boolean not null default false,
   created_at timestamptz not null default now()
 );
 
 -- Point catalog: the "role" list students pick from when logging a point entry.
 -- scope='show' roles carry two point values (One Act vs Full Length); scope='officer'
--- roles carry one flat value. Admin-editable; deactivate rather than delete so past
--- log entries keep their historical role reference.
+-- roles carry one flat value (this is the TIPS "Officer" point category — a student
+-- serving as troupe president, etc. — unrelated to site access/permissions).
+-- Admin-editable; deactivate rather than delete so past log entries keep their
+-- historical role reference.
 create table if not exists public.point_roles (
   id uuid primary key default gen_random_uuid(),
   scope text not null check (scope in ('show', 'officer')),
@@ -62,34 +63,8 @@ create table if not exists public.point_entries (
   created_at timestamptz not null default now()
 );
 
-create table if not exists public.officers (
-  id uuid primary key default gen_random_uuid(),
-  title text not null,
-  name text not null,
-  description text not null default '',
-  contact_link text not null default '',
-  sort_order int not null default 0,
-  created_at timestamptz not null default now()
-);
-
-create table if not exists public.membership_applications (
-  id uuid primary key default gen_random_uuid(),
-  last_name text not null,
-  first_name text not null,
-  email text not null,
-  phone text not null default '',
-  graduation_year int,
-  shirt_size text not null default '',
-  primary_interest text not null default '',
-  theatre_classes text not null default '',
-  honor_groups text not null default '',
-  interested_in_officer boolean not null default false,
-  officer_positions text[] not null default '{}',
-  submitted_at timestamptz not null default now()
-);
-
 -- ============================================================
--- 2. Helper functions (security definer avoids RLS recursion)
+-- 2. Helper function (security definer avoids RLS recursion)
 -- ============================================================
 
 create or replace function public.is_admin()
@@ -101,20 +76,7 @@ stable
 as $$
   select exists (
     select 1 from public.profiles
-    where id = auth.uid() and role = 'admin'
-  );
-$$;
-
-create or replace function public.is_officer_or_admin()
-returns boolean
-language sql
-security definer
-set search_path = public
-stable
-as $$
-  select exists (
-    select 1 from public.profiles
-    where id = auth.uid() and role in ('admin', 'officer')
+    where id = auth.uid() and is_admin = true
   );
 $$;
 
@@ -153,10 +115,8 @@ alter table public.profiles enable row level security;
 alter table public.point_roles enable row level security;
 alter table public.rank_thresholds enable row level security;
 alter table public.point_entries enable row level security;
-alter table public.officers enable row level security;
-alter table public.membership_applications enable row level security;
 
--- profiles: members read their own row; admins read/update everyone
+-- profiles: students read their own row; admins read/update everyone
 drop policy if exists "profiles_select_own" on public.profiles;
 create policy "profiles_select_own" on public.profiles
   for select using (id = auth.uid() or public.is_admin());
@@ -183,7 +143,7 @@ drop policy if exists "rank_thresholds_write_admin" on public.rank_thresholds;
 create policy "rank_thresholds_write_admin" on public.rank_thresholds
   for all using (public.is_admin()) with check (public.is_admin());
 
--- point_entries: members manage their own pending log; admins manage all
+-- point_entries: students manage their own pending log; admins manage all
 drop policy if exists "entries_select_own_or_admin" on public.point_entries;
 create policy "entries_select_own_or_admin" on public.point_entries
   for select using (user_id = auth.uid() or public.is_admin());
@@ -199,32 +159,6 @@ create policy "entries_delete_own_pending" on public.point_entries
 drop policy if exists "entries_update_admin" on public.point_entries;
 create policy "entries_update_admin" on public.point_entries
   for update using (public.is_admin());
-
--- officers: public readable, officer-or-admin managed
-drop policy if exists "officers_select_public" on public.officers;
-create policy "officers_select_public" on public.officers
-  for select using (true);
-
-drop policy if exists "officers_write_staff" on public.officers;
-create policy "officers_write_staff" on public.officers
-  for all using (public.is_officer_or_admin()) with check (public.is_officer_or_admin());
-
--- membership_applications: anyone can apply, only admins review
-drop policy if exists "applications_insert_public" on public.membership_applications;
-create policy "applications_insert_public" on public.membership_applications
-  for insert with check (true);
-
-drop policy if exists "applications_select_admin" on public.membership_applications;
-create policy "applications_select_admin" on public.membership_applications
-  for select using (public.is_admin());
-
-drop policy if exists "applications_update_admin" on public.membership_applications;
-create policy "applications_update_admin" on public.membership_applications
-  for update using (public.is_admin());
-
-drop policy if exists "applications_delete_admin" on public.membership_applications;
-create policy "applications_delete_admin" on public.membership_applications
-  for delete using (public.is_admin());
 
 -- ============================================================
 -- 5. Seed data: the published TIPS point catalog + rank ladder

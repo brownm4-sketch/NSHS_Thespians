@@ -1,8 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
-import type { MemberRole, Profile } from '../../types/database'
-
-const ROLES: MemberRole[] = ['admin', 'officer', 'member', 'pending_member', 'non_member']
+import type { Profile } from '../../types/database'
 
 export function MembersTab() {
   const [profiles, setProfiles] = useState<Profile[]>([])
@@ -37,7 +35,7 @@ export function MembersTab() {
             <th className="px-4 py-3">Name</th>
             <th className="px-4 py-3">Email</th>
             <th className="px-4 py-3">Grad Year</th>
-            <th className="px-4 py-3">Role</th>
+            <th className="px-4 py-3">Admin</th>
           </tr>
         </thead>
         <tbody>
@@ -56,17 +54,12 @@ export function MembersTab() {
                 />
               </td>
               <td className="px-4 py-2">
-                <select
-                  value={p.role}
-                  onChange={(e) => updateProfile(p.id, { role: e.target.value as MemberRole })}
-                  className="input py-1"
-                >
-                  {ROLES.map((r) => (
-                    <option key={r} value={r}>
-                      {r.replace('_', ' ')}
-                    </option>
-                  ))}
-                </select>
+                <input
+                  type="checkbox"
+                  checked={p.is_admin}
+                  onChange={(e) => updateProfile(p.id, { is_admin: e.target.checked })}
+                  className="h-4 w-4"
+                />
               </td>
             </tr>
           ))}

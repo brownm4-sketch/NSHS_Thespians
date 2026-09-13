@@ -32,9 +32,7 @@ export function Login() {
       })
       setSubmitting(false)
       if (error) return setError(error.message)
-      setInfo(
-        'Account created! Check your email to confirm, then sign in. Your membership will start as Pending until an officer approves it.',
-      )
+      setInfo('Account created! Check your email to confirm, then sign in.')
       setMode('signin')
     }
   }
@@ -42,7 +40,7 @@ export function Login() {
   return (
     <div className="mx-auto max-w-md">
       <h1 className="mb-6 text-center text-3xl font-bold text-blue-800">
-        {mode === 'signin' ? 'Member Login' : 'Request Membership Account'}
+        {mode === 'signin' ? 'Student Login' : 'Create Account'}
       </h1>
       <form onSubmit={handleSubmit} className="space-y-4 rounded-xl border border-blue-100 bg-white p-8 shadow-sm">
         {mode === 'signup' && (
@@ -95,7 +93,7 @@ export function Login() {
           <>
             Need an account?{' '}
             <button className="font-semibold text-orange-600 hover:underline" onClick={() => setMode('signup')}>
-              Request one
+              Sign up
             </button>
           </>
         ) : (

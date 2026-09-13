@@ -9,7 +9,6 @@ interface AuthContextValue {
   profile: Profile | null
   loading: boolean
   isAdmin: boolean
-  isOfficer: boolean
   refreshProfile: () => Promise<void>
   signOut: () => Promise<void>
 }
@@ -50,8 +49,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       session,
       profile,
       loading,
-      isAdmin: profile?.role === 'admin',
-      isOfficer: profile?.role === 'admin' || profile?.role === 'officer',
+      isAdmin: profile?.is_admin ?? false,
       refreshProfile: async () => {
         if (session) await loadProfile(session.user.id)
       },

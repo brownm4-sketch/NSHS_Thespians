@@ -1,4 +1,3 @@
-export type MemberRole = 'admin' | 'officer' | 'member' | 'pending_member' | 'non_member'
 export type EntryCategory = 'one_act' | 'full_length' | 'officer' | 'festival_event' | 'advocacy' | 'other'
 export type EntryStatus = 'pending' | 'approved' | 'rejected'
 export type RoleScope = 'show' | 'officer'
@@ -14,29 +13,12 @@ export const CATEGORY_LABELS: Record<EntryCategory, string> = {
 
 export const LEVELS = ['School/Local', 'District/Regional', 'State', 'National', 'Other'] as const
 
-export const SHIRT_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL'] as const
-export type ShirtSize = (typeof SHIRT_SIZES)[number]
-
-export const PRIMARY_INTERESTS = ['Acting', 'Technical/Crew', 'Music', 'Business', 'Directing', 'Writing', 'Other'] as const
-export type PrimaryInterest = (typeof PRIMARY_INTERESTS)[number]
-
-export const OFFICER_POSITIONS = [
-  'President',
-  'Vice President',
-  'Treasurer',
-  'Secretary/Clerk',
-  'Web Editor',
-  'State Thespian Officer (STO)',
-  'International Thespian Officer (ITO)',
-] as const
-export type OfficerPosition = (typeof OFFICER_POSITIONS)[number]
-
 export type Profile = {
   id: string
   email: string
   full_name: string
   graduation_year: number | null
-  role: MemberRole
+  is_admin: boolean
   created_at: string
 }
 
@@ -77,32 +59,6 @@ export type PointEntry = {
   created_at: string
 }
 
-export type Officer = {
-  id: string
-  title: string
-  name: string
-  description: string
-  contact_link: string
-  sort_order: number
-  created_at: string
-}
-
-export type MembershipApplication = {
-  id: string
-  last_name: string
-  first_name: string
-  email: string
-  phone: string
-  graduation_year: number | null
-  shirt_size: string
-  primary_interest: string
-  theatre_classes: string
-  honor_groups: string
-  interested_in_officer: boolean
-  officer_positions: string[]
-  submitted_at: string
-}
-
 /** Highest rank whose min_points the given total still clears, or null if below every rank. */
 export function computeRank(totalPoints: number, ranks: RankThreshold[]): RankThreshold | null {
   const sorted = [...ranks].sort((a, b) => a.min_points - b.min_points)
@@ -139,18 +95,6 @@ export type Database = {
         Row: PointEntry
         Insert: Partial<PointEntry> & { user_id: string; category: EntryCategory; activity_date: string }
         Update: Partial<PointEntry>
-        Relationships: []
-      }
-      officers: {
-        Row: Officer
-        Insert: Partial<Officer> & { title: string; name: string }
-        Update: Partial<Officer>
-        Relationships: []
-      }
-      membership_applications: {
-        Row: MembershipApplication
-        Insert: Partial<MembershipApplication> & { last_name: string; first_name: string; email: string }
-        Update: Partial<MembershipApplication>
         Relationships: []
       }
     }

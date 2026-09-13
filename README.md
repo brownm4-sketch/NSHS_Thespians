@@ -1,10 +1,9 @@
 # NSHS Thespian Society Tracker
 
-A web app for the school's Thespian Society troupe: a public home page, an
-officer roster, a public membership application, and a members-only area for
-logging points toward the Thespian Induction Point System (TIPS) — plus an
-admin panel for reviewing points, managing the point catalog and rank ladder,
-and reviewing applications.
+A web app for the school's Thespian Society troupe: students create an
+account and log points toward the Thespian Induction Point System (TIPS),
+and the teacher reviews/approves entries from an admin panel that also
+manages the point catalog and rank ladder.
 
 Built as a static single-page app (React + Vite + Tailwind CSS) backed by
 [Supabase](https://supabase.com) for authentication and the database. The
@@ -13,27 +12,22 @@ free tier with a simple drag-and-drop upload — no command line required.
 
 ## Features
 
-- **Home page** and public **Officers** roster.
-- **Public membership application** (`/apply`) — contact info, graduation
-  year, shirt size, primary interest, class/extracurricular history, and
-  officer interest with position picks. No login required to apply.
-- **Member login** — self-service sign-up; new accounts start as "Pending
-  Member" until an officer promotes them.
-- **Member dashboard** — log points against the TIPS catalog (One Act Show,
+- **Home page** with a login link — no public application or officer
+  roster, just a landing page pointing students to sign up.
+- **Student login** — self-service sign-up and sign-in; every account can
+  immediately start logging points.
+- **Student dashboard** — log points against the TIPS catalog (One Act Show,
   Full Length Show, Officer, Festival/Event Attendance, Advocacy, Other),
   see a full point log, total approved points, and current induction rank
   with progress to the next rank.
-- **Admin panel**:
-  - **Members** — manage roles and graduation years.
+- **Admin panel** (teacher-only, toggled via a simple `is_admin` flag):
+  - **Members** — see every student, set graduation year, promote another
+    account to admin if needed.
   - **Point Approval** — approve/reject submitted point entries, adjust
     bonus points.
   - **Point Catalog** — edit the point values for every role (or add new
     ones), deactivate roles without losing historical log entries.
   - **Rank Ladder** — edit the induction rank names and point thresholds.
-  - **Officers** — manage the public officer roster (officers can edit this
-    tab too, not just admins).
-  - **Applications** — review submitted applications, plus **bulk CSV
-    import** for existing application data.
 
 ## 1. Set up Supabase
 
@@ -51,7 +45,7 @@ free tier with a simple drag-and-drop upload — no command line required.
    domain once you have one, so confirmation email links redirect correctly.
 5. **Create your first admin**: sign up through the app once (see below),
    then in the Supabase Dashboard go to **Table Editor → profiles**, find
-   your row, and change `role` to `admin`.
+   your row, and set `is_admin` to `true`.
 
 ## 2. Configure the app
 
@@ -73,8 +67,8 @@ npm install
 npm run dev
 ```
 
-Visit the printed local URL. Sign up for an account, then promote yourself to
-`admin` in Supabase as described above to see the Admin Panel.
+Visit the printed local URL. Sign up for an account, then set `is_admin` to
+`true` on your profile in Supabase as described above to see the Admin Panel.
 
 ## 4. Build and deploy to Netlify
 
@@ -116,9 +110,8 @@ src/
                 ProtectedRoute, StatusBadge
   context/      AuthContext (Supabase session + profile)
   lib/          Supabase client
-  pages/        Home, Officers, Apply, Login, Dashboard
-  pages/admin/  AdminPanel + Members/PointEntries/PointCatalog/RankLadder/
-                Officers/Applications tabs
+  pages/        Home, Login, Dashboard
+  pages/admin/  AdminPanel + Members/PointEntries/PointCatalog/RankLadder tabs
   types/        Database row types + the computeRank() helper
 supabase/
   schema.sql    Tables, triggers, RLS policies, and TIPS seed data —
