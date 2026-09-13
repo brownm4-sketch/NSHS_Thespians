@@ -1,0 +1,39 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-blue-50: #f2f4f7;
+  --color-blue-100: #d9dfe7;
+  --color-blue-200: #b3bfce;
+  --color-blue-300: #8ca0b6;
+  --color-blue-400: #66809d;
+  --color-blue-500: #406085;
+  --color-blue-600: #1f4470;
+  --color-blue-700: #0d3664;
+  --color-blue-800: #00254e;
+  --color-blue-900: #002b5c;
+
+  --color-orange-50: #ffeee6;
+  --color-orange-100: #fed4c1;
+  --color-orange-200: #fdb18f;
+  --color-orange-300: #fc8e5d;
+  --color-orange-400: #fb6b2b;
+  --color-orange-500: #fa5105;
+  --color-orange-600: #d54504;
+  --color-orange-700: #af3904;
+  --color-orange-800: #8a2d03;
+  --color-orange-900: #642002;
+
+  --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+body {
+  @apply bg-slate-50 text-blue-900 font-sans antialiased;
+}
+
+.badge {
+  @apply inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold tracking-wide uppercase;
+}
+
+.input {
+  @apply w-full rounded-md border border-blue-200 px-3 py-2 text-blue-900 outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-200;
+}
