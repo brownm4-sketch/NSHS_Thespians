@@ -6,6 +6,7 @@ import { supabase } from '../lib/supabase'
 export function Login() {
   const [mode, setMode] = useState<'signin' | 'signup'>('signin')
   const [fullName, setFullName] = useState('')
+  const [graduationYear, setGraduationYear] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -28,12 +29,14 @@ export function Login() {
       const { error } = await supabase.auth.signUp({
         email,
         password,
-        options: { data: { full_name: fullName } },
+        options: { data: { full_name: fullName, graduation_year: graduationYear } },
       })
       setSubmitting(false)
       if (error) return setError(error.message)
       setInfo('Account created! Check your email to confirm, then sign in.')
       setMode('signin')
+      setFullName('')
+      setGraduationYear('')
     }
   }
 
@@ -44,15 +47,27 @@ export function Login() {
       </h1>
       <form onSubmit={handleSubmit} className="space-y-4 rounded-xl border border-blue-100 bg-white p-8 shadow-sm">
         {mode === 'signup' && (
-          <Field label="Full Name">
-            <input
-              required
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              className="input"
-              placeholder="Jane Doe"
-            />
-          </Field>
+          <>
+            <Field label="Full Name">
+              <input
+                required
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                className="input"
+                placeholder="Jane Doe"
+              />
+            </Field>
+            <Field label="Graduation Year">
+              <input
+                required
+                type="number"
+                value={graduationYear}
+                onChange={(e) => setGraduationYear(e.target.value)}
+                className="input"
+                placeholder="2027"
+              />
+            </Field>
+          </>
         )}
         <Field label="Email">
           <input
