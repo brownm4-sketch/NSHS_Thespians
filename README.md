@@ -15,7 +15,8 @@ free tier with a simple drag-and-drop upload — no command line required.
 - **Home page** with a login link — no public application or officer
   roster, just a landing page pointing students to sign up.
 - **Student login** — self-service sign-up and sign-in; every account can
-  immediately start logging points.
+  immediately start logging points. Includes self-service password reset
+  via emailed link.
 - **Student dashboard** — log points against the TIPS catalog (One Act Show,
   Full Length Show, Officer, Festival/Event Attendance, Advocacy, Other),
   see a full point log, total approved points, and current induction rank
@@ -43,6 +44,10 @@ free tier with a simple drag-and-drop upload — no command line required.
    turn off "Confirm email" while testing — or leave it on and set the
    **Site URL** (Authentication → URL Configuration) to your real Netlify
    domain once you have one, so confirmation email links redirect correctly.
+   Once you have a real domain, also add `https://your-site.netlify.app/reset-password`
+   under **Redirect URLs** on that same page — required for the "Forgot
+   password?" email link to work (it won't redirect correctly without this,
+   even though the password does get reset).
 5. **Create your first admin**: sign up through the app once (see below),
    then in the Supabase Dashboard go to **Table Editor → profiles**, find
    your row, and set `is_admin` to `true`.

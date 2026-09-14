@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 
 export function Login() {
-  const [mode, setMode] = useState<'signin' | 'signup'>('signin')
+  const [mode, setMode] = useState<'signin' | 'signup' | 'forgot'>('signin')
   const [fullName, setFullName] = useState('')
   const [graduationYear, setGraduationYear] = useState('')
   const [email, setEmail] = useState('')
@@ -25,7 +25,7 @@ export function Login() {
       setSubmitting(false)
       if (error) return setError(error.message)
       navigate('/dashboard')
-    } else {
+    } else if (mode === 'signup') {
       const { error } = await supabase.auth.signUp({
         email,
         password,
@@ -37,14 +37,23 @@ export function Login() {
       setMode('signin')
       setFullName('')
       setGraduationYear('')
+    } else {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      })
+      setSubmitting(false)
+      if (error) return setError(error.message)
+      setInfo('If an account exists for that email, a password reset link is on its way.')
     }
   }
 
+  const title = mode === 'signin' ? 'Student Login' : mode === 'signup' ? 'Create Account' : 'Reset Password'
+  const buttonLabel =
+    mode === 'signin' ? 'Sign In' : mode === 'signup' ? 'Create Account' : 'Send Reset Link'
+
   return (
     <div className="mx-auto max-w-md">
-      <h1 className="mb-6 text-center text-3xl font-bold text-blue-800">
-        {mode === 'signin' ? 'Student Login' : 'Create Account'}
-      </h1>
+      <h1 className="mb-6 text-center text-3xl font-bold text-blue-800">{title}</h1>
       <form onSubmit={handleSubmit} className="space-y-4 rounded-xl border border-blue-100 bg-white p-8 shadow-sm">
         {mode === 'signup' && (
           <>
@@ -79,17 +88,33 @@ export function Login() {
             placeholder="you@school.edu"
           />
         </Field>
-        <Field label="Password">
-          <input
-            required
-            type="password"
-            minLength={6}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="input"
-            placeholder="••••••••"
-          />
-        </Field>
+        {mode !== 'forgot' && (
+          <Field label="Password">
+            <input
+              required
+              type="password"
+              minLength={6}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="input"
+              placeholder="••••••••"
+            />
+          </Field>
+        )}
+
+        {mode === 'signin' && (
+          <button
+            type="button"
+            onClick={() => {
+              setError(null)
+              setInfo(null)
+              setMode('forgot')
+            }}
+            className="text-sm font-semibold text-orange-600 hover:underline"
+          >
+            Forgot password?
+          </button>
+        )}
 
         {error && <p className="text-sm text-red-600">{error}</p>}
         {info && <p className="text-sm text-emerald-600">{info}</p>}
@@ -99,23 +124,32 @@ export function Login() {
           disabled={submitting}
           className="w-full rounded-md bg-blue-700 px-4 py-2 font-semibold text-white transition-colors hover:bg-blue-600 disabled:opacity-50"
         >
-          {submitting ? 'Please wait…' : mode === 'signin' ? 'Sign In' : 'Create Account'}
+          {submitting ? 'Please wait…' : buttonLabel}
         </button>
       </form>
 
       <p className="mt-4 text-center text-sm text-blue-600">
-        {mode === 'signin' ? (
+        {mode === 'signin' && (
           <>
             Need an account?{' '}
             <button className="font-semibold text-orange-600 hover:underline" onClick={() => setMode('signup')}>
               Sign up
             </button>
           </>
-        ) : (
+        )}
+        {mode === 'signup' && (
           <>
             Already have an account?{' '}
             <button className="font-semibold text-orange-600 hover:underline" onClick={() => setMode('signin')}>
               Sign in
+            </button>
+          </>
+        )}
+        {mode === 'forgot' && (
+          <>
+            Remembered it after all?{' '}
+            <button className="font-semibold text-orange-600 hover:underline" onClick={() => setMode('signin')}>
+              Back to sign in
             </button>
           </>
         )}
