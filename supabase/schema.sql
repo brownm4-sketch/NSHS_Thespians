@@ -15,6 +15,11 @@ create table if not exists public.profiles (
   created_at timestamptz not null default now()
 );
 
+-- Self-healing: if profiles already existed from an older version of this file,
+-- make sure it still has every column the current app expects.
+alter table public.profiles add column if not exists graduation_year int;
+alter table public.profiles add column if not exists is_admin boolean not null default false;
+
 -- Point catalog: the "role" list students pick from when logging a point entry.
 -- scope='show' roles carry two point values (One Act vs Full Length); scope='officer'
 -- roles carry one flat value (this is the TIPS "Officer" point category — a student
