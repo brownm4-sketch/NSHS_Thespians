@@ -15,7 +15,7 @@ export function Home() {
           to="/login"
           className="mt-8 inline-block rounded-md bg-orange-500 px-6 py-3 font-semibold text-blue-900 transition-colors hover:bg-orange-400"
         >
-          Student Login
+          Login
         </Link>
       </section>
 

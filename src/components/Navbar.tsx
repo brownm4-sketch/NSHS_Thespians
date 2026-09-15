@@ -35,7 +35,7 @@ export function Navbar() {
             <NavLink to="/" className={linkClass} end>
               Home
             </NavLink>
-            {session && (
+            {session && !isAdmin && (
               <NavLink to="/dashboard" className={linkClass}>
                 My Dashboard
               </NavLink>
@@ -57,7 +57,7 @@ export function Navbar() {
                 to="/login"
                 className="ml-2 rounded-md bg-orange-500 px-3 py-2 text-sm font-semibold text-blue-900 transition-colors hover:bg-orange-400"
               >
-                Student Login
+                Login
               </NavLink>
             )}
           </div>
@@ -102,7 +102,7 @@ export function Navbar() {
                 onClick={closeMenu}
                 className="mt-1 block rounded-md bg-orange-500 px-3 py-2 text-center text-sm font-semibold text-blue-900 transition-colors hover:bg-orange-400"
               >
-                Student Login
+                Login
               </NavLink>
             )}
           </div>

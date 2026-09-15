@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { FormEvent } from 'react'
+import { Navigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabase'
 import { StatusBadge } from '../components/StatusBadge'
@@ -10,7 +11,7 @@ const SHOW_CATEGORIES: EntryCategory[] = ['one_act', 'full_length']
 const HOURS_CATEGORIES: EntryCategory[] = ['festival_event', 'advocacy', 'other']
 
 export function Dashboard() {
-  const { profile } = useAuth()
+  const { profile, isAdmin } = useAuth()
   const [entries, setEntries] = useState<PointEntry[]>([])
   const [roles, setRoles] = useState<PointRole[]>([])
   const [ranks, setRanks] = useState<RankThreshold[]>([])
@@ -132,6 +133,7 @@ export function Dashboard() {
   }
 
   if (!profile) return <div className="py-20 text-center text-blue-500">Loading your profile…</div>
+  if (isAdmin) return <Navigate to="/admin" replace />
 
   const approvedPoints = entries
     .filter((e) => e.status === 'approved')

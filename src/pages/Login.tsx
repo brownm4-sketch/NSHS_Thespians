@@ -47,7 +47,7 @@ export function Login() {
     }
   }
 
-  const title = mode === 'signin' ? 'Student Login' : mode === 'signup' ? 'Create Account' : 'Reset Password'
+  const title = mode === 'signin' ? 'Login' : mode === 'signup' ? 'Create Account' : 'Reset Password'
   const buttonLabel =
     mode === 'signin' ? 'Sign In' : mode === 'signup' ? 'Create Account' : 'Send Reset Link'
 
