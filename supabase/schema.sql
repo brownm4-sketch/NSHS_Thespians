@@ -90,13 +90,21 @@ language plpgsql
 security definer
 set search_path = public
 as $$
+declare
+  grad_year int;
 begin
+  begin
+    grad_year := nullif(new.raw_user_meta_data ->> 'graduation_year', '')::int;
+  exception when others then
+    grad_year := null;
+  end;
+
   insert into public.profiles (id, email, full_name, graduation_year)
   values (
     new.id,
     new.email,
     coalesce(new.raw_user_meta_data ->> 'full_name', ''),
-    nullif(new.raw_user_meta_data ->> 'graduation_year', '')::int
+    grad_year
   )
   on conflict (id) do nothing;
   return new;
