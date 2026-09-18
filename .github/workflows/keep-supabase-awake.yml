@@ -1,0 +1,25 @@
+name: Keep Supabase project awake
+
+# Supabase's free tier pauses a project after 7 days with no API activity.
+# This pings the project's public REST API twice a week so it never sits
+# idle long enough to trigger that — pure read of a public table, no writes.
+
+on:
+  schedule:
+    - cron: '0 8 * * 2,5' # Tuesday and Friday, 08:00 UTC
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase REST API
+        run: |
+          status=$(curl -sS -o /dev/null -w "%{http_code}" \
+            "https://yrytqgqabrwomjunqqso.supabase.co/rest/v1/point_roles?select=id&limit=1" \
+            -H "apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlyeXRxZ3FhYnJ3b21qdW5xcXNvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkyNDk4OTksImV4cCI6MjEwNDgyNTg5OX0.M4kvvmluUMp-CDnUw-GRfKslLBjiMyFNCPsO-SNvOcM" \
+            -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlyeXRxZ3FhYnJ3b21qdW5xcXNvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkyNDk4OTksImV4cCI6MjEwNDgyNTg5OX0.M4kvvmluUMp-CDnUw-GRfKslLBjiMyFNCPsO-SNvOcM")
+          echo "Supabase REST API responded with HTTP $status"
+          if [ "$status" -ge 400 ]; then
+            echo "::warning::Supabase ping returned an error status — check that the project is reachable."
+          fi
