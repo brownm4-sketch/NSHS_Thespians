@@ -1,12 +1,14 @@
 name: Keep Supabase project awake
 
 # Supabase's free tier pauses a project after 7 days with no API activity.
-# This pings the project's public REST API twice a week so it never sits
-# idle long enough to trigger that — pure read of a public table, no writes.
+# This pings the project's public REST API daily so it never sits idle long
+# enough to trigger that — pure read of a public table, no writes. Daily
+# (rather than weekly) gives a big safety margin against GitHub occasionally
+# delaying or skipping an individual scheduled run.
 
 on:
   schedule:
-    - cron: '0 8 * * 2,5' # Tuesday and Friday, 08:00 UTC
+    - cron: '0 8 * * *' # every day, 08:00 UTC
   workflow_dispatch:
 
 jobs:
