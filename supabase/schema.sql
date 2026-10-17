@@ -284,6 +284,10 @@ on conflict (id) do nothing;
 
 alter table public.keepalive_ping enable row level security;
 
+drop policy if exists "keepalive_ping_select_public" on public.keepalive_ping;
+create policy "keepalive_ping_select_public" on public.keepalive_ping
+  for select using (true);
+
 drop policy if exists "keepalive_ping_insert_anon" on public.keepalive_ping;
 create policy "keepalive_ping_insert_anon" on public.keepalive_ping
   for insert with check (true);

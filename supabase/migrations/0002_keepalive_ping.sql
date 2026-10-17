@@ -15,11 +15,16 @@ on conflict (id) do nothing;
 
 alter table public.keepalive_ping enable row level security;
 
--- No select policy on purpose: this table isn't meant to be read by anyone,
--- just upserted into daily by the keepalive workflow using the anon key.
--- No "to" role restriction either (matches every other policy in this
--- schema, e.g. point_roles_select_public) — an explicit "to anon,
--- authenticated" clause here was rejecting the anon-key upsert.
+-- A select policy turns out to be required even though nothing reads this
+-- table directly: Postgres' RLS + "INSERT ... ON CONFLICT DO UPDATE" needs
+-- SELECT visibility on the existing row to detect the conflict at all, or
+-- it denies the write outright ("new row violates row-level security
+-- policy") instead of routing to the UPDATE path. The table holds nothing
+-- sensitive (just a timestamp), so making it selectable is harmless.
+drop policy if exists "keepalive_ping_select_public" on public.keepalive_ping;
+create policy "keepalive_ping_select_public" on public.keepalive_ping
+  for select using (true);
+
 drop policy if exists "keepalive_ping_insert_anon" on public.keepalive_ping;
 create policy "keepalive_ping_insert_anon" on public.keepalive_ping
   for insert with check (true);
