@@ -17,16 +17,15 @@ alter table public.keepalive_ping enable row level security;
 
 -- No select policy on purpose: this table isn't meant to be read by anyone,
 -- just upserted into daily by the keepalive workflow using the anon key.
+-- No "to" role restriction either (matches every other policy in this
+-- schema, e.g. point_roles_select_public) — an explicit "to anon,
+-- authenticated" clause here was rejecting the anon-key upsert.
 drop policy if exists "keepalive_ping_insert_anon" on public.keepalive_ping;
 create policy "keepalive_ping_insert_anon" on public.keepalive_ping
-  for insert to anon, authenticated
-  with check (true);
+  for insert with check (true);
 
 drop policy if exists "keepalive_ping_update_anon" on public.keepalive_ping;
 create policy "keepalive_ping_update_anon" on public.keepalive_ping
-  for update to anon, authenticated
-  using (true) with check (true);
+  for update using (true) with check (true);
 
--- RLS policies only gate access AFTER the base table grant — without this,
--- PostgREST returns 401 for the anon role even though a matching policy exists.
 grant insert, update on public.keepalive_ping to anon, authenticated;
