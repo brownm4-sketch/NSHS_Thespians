@@ -293,3 +293,5 @@ drop policy if exists "keepalive_ping_update_anon" on public.keepalive_ping;
 create policy "keepalive_ping_update_anon" on public.keepalive_ping
   for update to anon, authenticated
   using (true) with check (true);
+
+grant insert, update on public.keepalive_ping to anon, authenticated;
