@@ -30,14 +30,15 @@ jobs:
       - name: Write ping (keepalive_ping upsert)
         run: |
           now=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-          status=$(curl -sS -o /dev/null -w "%{http_code}" \
+          response=$(curl -sS -w "\nHTTP_STATUS:%{http_code}" \
             -X POST "https://yrytqgqabrwomjunqqso.supabase.co/rest/v1/keepalive_ping" \
             -H "apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlyeXRxZ3FhYnJ3b21qdW5xcXNvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkyNDk4OTksImV4cCI6MjEwNDgyNTg5OX0.M4kvvmluUMp-CDnUw-GRfKslLBjiMyFNCPsO-SNvOcM" \
             -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlyeXRxZ3FhYnJ3b21qdW5xcXNvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkyNDk4OTksImV4cCI6MjEwNDgyNTg5OX0.M4kvvmluUMp-CDnUw-GRfKslLBjiMyFNCPsO-SNvOcM" \
             -H "Content-Type: application/json" \
             -H "Prefer: resolution=merge-duplicates,return=minimal" \
             -d "{\"id\":1,\"pinged_at\":\"$now\"}")
-          echo "Write ping responded with HTTP $status"
+          echo "$response"
+          status=$(echo "$response" | tail -1 | sed 's/HTTP_STATUS://')
           if [ "$status" -ge 400 ]; then
             echo "::error::Supabase write ping failed — the keepalive_ping table may not exist yet (run supabase/migrations/0002_keepalive_ping.sql) or the project is unreachable."
             exit 1
