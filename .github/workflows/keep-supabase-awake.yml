@@ -1,10 +1,11 @@
 name: Keep Supabase project awake
 
-# Supabase's free tier pauses a project after 7 days with no API activity.
-# This pings the project's public REST API daily so it never sits idle long
-# enough to trigger that — pure read of a public table, no writes. Daily
-# (rather than weekly) gives a big safety margin against GitHub occasionally
-# delaying or skipping an individual scheduled run.
+# Supabase's free tier pauses a project after a period of inactivity, and a
+# pure read-only ping apparently doesn't satisfy its "sufficient activity"
+# bar. So in addition to the read, this upserts a row into a dedicated
+# keepalive_ping table daily — a real write, isolated from the app schema
+# (see supabase/migrations/0002_keepalive_ping.sql), that nothing else in
+# the site reads or depends on.
 
 on:
   schedule:
@@ -15,13 +16,29 @@ jobs:
   ping:
     runs-on: ubuntu-latest
     steps:
-      - name: Ping Supabase REST API
+      - name: Read ping (public table)
         run: |
           status=$(curl -sS -o /dev/null -w "%{http_code}" \
             "https://yrytqgqabrwomjunqqso.supabase.co/rest/v1/point_roles?select=id&limit=1" \
             -H "apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlyeXRxZ3FhYnJ3b21qdW5xcXNvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkyNDk4OTksImV4cCI6MjEwNDgyNTg5OX0.M4kvvmluUMp-CDnUw-GRfKslLBjiMyFNCPsO-SNvOcM" \
             -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlyeXRxZ3FhYnJ3b21qdW5xcXNvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkyNDk4OTksImV4cCI6MjEwNDgyNTg5OX0.M4kvvmluUMp-CDnUw-GRfKslLBjiMyFNCPsO-SNvOcM")
-          echo "Supabase REST API responded with HTTP $status"
+          echo "Read ping responded with HTTP $status"
           if [ "$status" -ge 400 ]; then
-            echo "::warning::Supabase ping returned an error status — check that the project is reachable."
+            echo "::warning::Supabase read ping returned an error status — check that the project is reachable."
+          fi
+
+      - name: Write ping (keepalive_ping upsert)
+        run: |
+          now=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          status=$(curl -sS -o /dev/null -w "%{http_code}" \
+            -X POST "https://yrytqgqabrwomjunqqso.supabase.co/rest/v1/keepalive_ping" \
+            -H "apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlyeXRxZ3FhYnJ3b21qdW5xcXNvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkyNDk4OTksImV4cCI6MjEwNDgyNTg5OX0.M4kvvmluUMp-CDnUw-GRfKslLBjiMyFNCPsO-SNvOcM" \
+            -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlyeXRxZ3FhYnJ3b21qdW5xcXNvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkyNDk4OTksImV4cCI6MjEwNDgyNTg5OX0.M4kvvmluUMp-CDnUw-GRfKslLBjiMyFNCPsO-SNvOcM" \
+            -H "Content-Type: application/json" \
+            -H "Prefer: resolution=merge-duplicates,return=minimal" \
+            -d "{\"id\":1,\"pinged_at\":\"$now\"}")
+          echo "Write ping responded with HTTP $status"
+          if [ "$status" -ge 400 ]; then
+            echo "::error::Supabase write ping failed — the keepalive_ping table may not exist yet (run supabase/migrations/0002_keepalive_ping.sql) or the project is unreachable."
+            exit 1
           fi
