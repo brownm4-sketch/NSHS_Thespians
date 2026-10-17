@@ -290,10 +290,10 @@ create policy "keepalive_ping_select_public" on public.keepalive_ping
 
 drop policy if exists "keepalive_ping_insert_anon" on public.keepalive_ping;
 create policy "keepalive_ping_insert_anon" on public.keepalive_ping
-  for insert with check (true);
+  for insert with check (id = 1);
 
 drop policy if exists "keepalive_ping_update_anon" on public.keepalive_ping;
 create policy "keepalive_ping_update_anon" on public.keepalive_ping
-  for update using (true) with check (true);
+  for update using (id = 1) with check (id = 1);
 
 grant insert, update on public.keepalive_ping to anon, authenticated;
